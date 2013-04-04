@@ -1,18 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="org.peercast.core"
-      android:versionCode="1"
-      android:versionName="0.1-alpha">
+      android:versionCode="2"
+      android:versionName="0.2-beta">
     <uses-sdk android:minSdkVersion="9" />
     <uses-permission android:name="android.permission.INTERNET"/>
-    <application android:label="@string/app_name" android:debuggable="true" android:icon="@drawable/ic_launcher">
+    <application android:label="@string/app_name" android:debuggable="false" android:icon="@drawable/ic_launcher">
         <activity android:name="org.peercast.core.PeerCastMainActivity"
-                  android:label="@string/app_name">
+                  android:label="@string/app_name" android:configChanges="orientation|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name="PeerCastService" />
+        <service android:name="PeerCastService" >
+            <intent-filter>
+                 <action android:name="org.peercast.core.IPeerCast" />
+                
+            </intent-filter>
+        </service>
     </application>
 </manifest> 

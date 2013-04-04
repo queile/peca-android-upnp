@@ -23,34 +23,13 @@ public class PeerCastService extends Service {
 	private ServiceThread peercast;
 	static final String TAG = "PeCaSrv";
 
-	public class ServiceBinder extends Binder {
-		public PeerCastService getService() {
-			return PeerCastService.this;
+	private final IPeerCast.Stub binder = new IPeerCast.Stub() {
+		@Override
+		public int getServerPort() throws RemoteException {
+			return getServerPortImpl();
 		}
-	}
-/*
-	@Override
-	public int onStartCommand(Intent intent, int flags, int startId) {
-		Context ctxt = getApplicationContext();
-		File iniFile = ctxt.getFileStreamPath("peercast.ini");
-		File resouceDir = ctxt.getFilesDir();//ctxt.getDir("res", ctxt.MODE_PRIVATE);
-		if (peercast == null) {
-			peercast = new ServiceThread(iniFile, resouceDir);
-			peercast.start();
-			try {
-				// 開始時、動作ポートを取得するため待ちます.
-				synchronized (peercast.lockStartWait) {
-					peercast.lockStartWait.wait();
-				}
-			} catch (InterruptedException e) {
-			}
-		}
-		Notification notifi = new Notification();
-		//notifi.icon = R.drawable.ic_launcher;
-		startForeground(1, notifi);
-		return START_REDELIVER_INTENT;
-	}
-*/
+	};
+	
 	@Override
 	public IBinder onBind(Intent arg0) {
 		Context ctxt = getApplicationContext();
@@ -71,7 +50,7 @@ public class PeerCastService extends Service {
 		//notifi.icon = R.drawable.ic_launcher;
 		startForeground(1, notifi);
 		
-		return new ServiceBinder();
+		return binder;
 	}
 	
 	@Override
@@ -86,7 +65,7 @@ public class PeerCastService extends Service {
 		peercast = null;
 	}
 
-	public int getServerPort() {
+	private int getServerPortImpl() {
 		if (peercast == null)
 			return -1;
 		return peercast.port;

@@ -4,8 +4,7 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := peercast
 
-_CORE=PeerCastIM-Linux/core
-#_CORE=PeerCastQT-Mod/core
+_CORE=PeerCast-IM4U/core
 
 #ndk-build NDK_DEBUG=1 V=1 TARGET_PLATFORM=android-9
 

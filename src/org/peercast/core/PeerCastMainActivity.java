@@ -1,26 +1,17 @@
 package org.peercast.core;
+
 /**
-* (c) 2013, T Yoshizawa
-*
-* Dual licensed under the MIT or GPL licenses.
-*/
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.util.zip.Inflater;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+ * (c) 2013, T Yoshizawa
+ *
+ * Dual licensed under the MIT or GPL licenses.
+ */
+import java.io.*;
+import java.util.zip.*;
 
 import org.peercast.core.R;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -28,98 +19,99 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.RemoteException;
+import android.preference.CheckBoxPreference;
+import android.preference.Preference;
+import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceActivity;
+import android.preference.PreferenceCategory;
+import android.preference.PreferenceManager;
+import android.preference.PreferenceScreen;
+import android.preference.SwitchPreference;
 import android.util.Log;
-import android.widget.Button;
-import android.widget.TextView;
-import android.view.View;
-import android.view.View.OnClickListener;
 
-public class PeerCastMainActivity extends Activity {
 
-	private PeerCastService mService;
+public class PeerCastMainActivity extends PreferenceActivity implements
+		ServiceConnection {
 
-	static final String LABLE_START = "Start Server";
-	static final String LABLE_STOP = "Stop Server";
-  
+	final String TAG = getClass().getSimpleName();
+	
+	private IPeerCast mIPeerCast;
+
+	private CharSequence pref_key_server_running;
+	private CharSequence pref_key_settings;
+	
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.peercast_main_activity);
-
-		Button btn_start_stop = (Button) findViewById(R.id.btn_start_stop);
-		btn_start_stop.setOnClickListener(btnListener);
-
-		Button btn_settings = (Button) findViewById(R.id.btn_settings);
-		btn_settings.setOnClickListener(btnListener);
-
-		TextView tv = (TextView) findViewById(R.id.textView1);
+	protected void onPostCreate(Bundle savedInstanceState) {
+		super.onPostCreate(savedInstanceState);
+		addPreferencesFromResource(R.xml.prefs);
+		
+		pref_key_server_running = getText(R.string.pref_key_server_running);
+		pref_key_settings = getText(R.string.pref_key_settings);
+		
+		CheckBoxPreference prefRun = (CheckBoxPreference)findPreference(pref_key_server_running); 
+		prefRun.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+			@Override
+			public boolean onPreferenceChange(Preference arg0, Object val) {
+				if ((Boolean)val)
+					bindPeerCastService();
+				else
+					unbindPeerCastService();
+				
+				return true;
+			}
+		});
+		Preference prefSetting = findPreference(pref_key_settings);
 		try {
-			//assetInstall(getDir("res", MODE_PRIVATE));
-			assetInstall(getFilesDir());
+			assetInstall();
 		} catch (IOException e) {
-			tv.setText("ERROR: html-dir install failed.");
+			prefSetting.setTitle("ERROR: html-dir install failed.");
+			prefSetting.setSummary(e.toString());
+			prefRun.setChecked(false);
+			prefRun.setEnabled(false);
 			return;
 		}
 
-		startPeerCastService();
 		
-	}
-
-	private void startPeerCastService() {
-		Intent i = new Intent(this, PeerCastService.class);
-		//startService(i);		 
-		bindService(i, conn, BIND_AUTO_CREATE);
-	}
-
-	private void stopPeerCastService() {
-		unbindService(conn);//();
-		//stopService(new Intent(this, PeerCastService.class));
-		//if (true)return;
-		TextView tv = (TextView) findViewById(R.id.textView1);
-		tv.setText("PeerCast-Server stopped.");
-		Button btn_start_stop = (Button) findViewById(R.id.btn_start_stop);
-		btn_start_stop.setText(LABLE_START);
-		Button btn_settings = (Button) findViewById(R.id.btn_settings);
-		btn_settings.setEnabled(false);
-	}
-
-	private OnClickListener btnListener = new OnClickListener() {
-		public void onClick(View v) {
-			Button btn = (Button) v;
-			switch (v.getId()) {
-			case R.id.btn_start_stop:
-
-				if (LABLE_STOP.equals(btn.getText())) {
-					btn.setText(LABLE_START);
-					stopPeerCastService();
-				} else if (LABLE_START.equals(btn.getText())) {
-					btn.setText(LABLE_STOP);
-					startPeerCastService();
-				}
-				break;
-
-			case R.id.btn_settings:
-				int port = mService.getServerPort();
-				Uri uri = Uri.parse("http://localhost:" + port + "/");
-				Intent i = new Intent(Intent.ACTION_VIEW, uri);
-				Log.i("", i.toString());
-				startActivity(i);
-				break;
-			}
+		if (prefRun.isChecked()){
+			bindPeerCastService();
+		} else {
+			prefSetting.setEnabled(false);
 		}
-	};
+	}
+
+	private void bindPeerCastService() {
+		Intent i = new Intent(this, PeerCastService.class);
+		bindService(i, this, BIND_AUTO_CREATE);
+	}
+
+	private void unbindPeerCastService() {
+		if (mIPeerCast != null){
+			onUnbinded();
+			unbindService(this);
+			mIPeerCast = null;
+		}
+	}
+ 
+	private void onUnbinded() {
+		CheckBoxPreference prefRun = (CheckBoxPreference)findPreference(pref_key_server_running);
+		prefRun.setTitle(R.string.msg_peercast_server_stopped);
+		Preference prefSetting = (Preference) findPreference(pref_key_settings);
+		prefSetting.setEnabled(false);
+	}
+	
+	
 
 	public void onBackPressed() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage("Are you sure you want to exit?")
+		builder.setMessage(R.string.msg_are_you_sure_you_want_to_exit)
 				.setCancelable(false)
 				.setPositiveButton("Yes",
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int id) {
-								stopPeerCastService();
+								unbindPeerCastService();
 								finish();
-								
+
 							}
 						})
 				.setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -132,7 +124,9 @@ public class PeerCastMainActivity extends Activity {
 
 	}
 
-	private void assetInstall(File dataDir) throws IOException {
+	private void assetInstall() throws IOException {
+		File dataDir = getFilesDir();
+
 		ZipInputStream zipIs = new ZipInputStream(getAssets().open("peca.zip"));
 		try {
 			ZipEntry ze;
@@ -146,7 +140,7 @@ public class PeerCastMainActivity extends Activity {
 					continue;
 				}
 				file.getParentFile().mkdirs();
-				Log.d("PeCa", "Install resource -> " + file.getAbsolutePath());
+				Log.d(TAG, "Install resource -> " + file.getAbsolutePath());
 				FileOutputStream fout = new FileOutputStream(file);
 				byte[] buffer = new byte[1024];
 				int length = 0;
@@ -160,29 +154,33 @@ public class PeerCastMainActivity extends Activity {
 			zipIs.close();
 		}
 	}
-	
-	
-	private ServiceConnection conn = new ServiceConnection() {
-		@Override
-		public void onServiceConnected(ComponentName name, IBinder binder) {
-			mService = ((PeerCastService.ServiceBinder) binder).getService();
 
+	@Override
+	public void onServiceConnected(ComponentName name, IBinder binder) {
+		mIPeerCast = IPeerCast.Stub.asInterface(binder);
 
-			TextView tv = (TextView) findViewById(R.id.textView1);
-			Button btn_start_stop = (Button) findViewById(R.id.btn_start_stop);
-			btn_start_stop.setText(LABLE_STOP);
-			tv.setText("PeerCast-Server running on " + mService.getServerPort());
-			
-			Button btn_settings = (Button) findViewById(R.id.btn_settings);
-			btn_settings.setEnabled(true);
+		CheckBoxPreference prefPeCaRunning = (CheckBoxPreference)findPreference(pref_key_server_running);
+		int port = -1;
+		try {
+			port = mIPeerCast.getServerPort();
+		} catch (RemoteException e) {
 		}
-		@Override
-		public void onServiceDisconnected(ComponentName name) {
-			mService = null;
-			TextView tv = (TextView) findViewById(R.id.textView1);
-			tv.setText("PeerCast-Server stopped...");
-			Button btn_settings = (Button) findViewById(R.id.btn_start_stop);
-			btn_settings.setText(LABLE_START);			
-		}
-	};
+		String s = getText(R.string.msg_peercast_server_running).toString();
+		
+		prefPeCaRunning.setTitle(s + " " + port);
+
+		Preference prefSetting = (Preference) findPreference(pref_key_settings);
+		Uri u = Uri.parse("http://localhost:"+port+"/");
+		prefSetting.setSummary(u.toString());
+		prefSetting.setEnabled(true);
+		Intent i = new Intent(Intent.ACTION_VIEW, u);
+		prefSetting.setIntent(i);
+	}
+
+	@Override
+	public void onServiceDisconnected(ComponentName name) {
+		mIPeerCast = null;
+		onUnbinded();
+	}
+
 }
