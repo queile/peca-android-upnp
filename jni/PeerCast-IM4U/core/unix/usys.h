@@ -32,7 +32,7 @@ class USys : public Sys
 public:
 	USys();
 
-	virtual	ClientSocket	*createSocket();
+	virtual ClientSocket	*createSocket();
 	virtual bool			startThread(ThreadInfo *);
 	virtual void			sleep(int );
 	virtual void			appMsg(long,long);

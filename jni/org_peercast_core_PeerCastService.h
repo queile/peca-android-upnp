@@ -7,13 +7,23 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#undef org_peercast_core_PeerCastService_MSG_SERVICE_REGISTER_CLIENT
+#define org_peercast_core_PeerCastService_MSG_SERVICE_REGISTER_CLIENT 0L
+#undef org_peercast_core_PeerCastService_MSG_SERVICE_UNREGISTER_CLIENT
+#define org_peercast_core_PeerCastService_MSG_SERVICE_UNREGISTER_CLIENT 1L
+#undef org_peercast_core_PeerCastService_MSG_SERVICE_QUERY_SERVER_PORT
+#define org_peercast_core_PeerCastService_MSG_SERVICE_QUERY_SERVER_PORT 16L
+#undef org_peercast_core_PeerCastService_MSG_SERVICE_ON_SERVER_START
+#define org_peercast_core_PeerCastService_MSG_SERVICE_ON_SERVER_START 32L
+#undef org_peercast_core_PeerCastService_MSG_SERVICE_ON_NOTIFY_MESSAGE
+#define org_peercast_core_PeerCastService_MSG_SERVICE_ON_NOTIFY_MESSAGE 33L
 /*
  * Class:     org_peercast_core_PeerCastService
  * Method:    nativeStart
  * Signature: (Ljava/lang/String;Ljava/lang/String;)I
  */
 JNIEXPORT jint JNICALL Java_org_peercast_core_PeerCastService_nativeStart
-  (JNIEnv *, jclass, jstring, jstring);
+  (JNIEnv *, jobject, jstring, jstring);
 
 /*
  * Class:     org_peercast_core_PeerCastService
@@ -21,7 +31,7 @@ JNIEXPORT jint JNICALL Java_org_peercast_core_PeerCastService_nativeStart
  * Signature: ()V
  */
 JNIEXPORT void JNICALL Java_org_peercast_core_PeerCastService_nativeQuit
-  (JNIEnv *, jclass);
+  (JNIEnv *, jobject);
 
 /*
  * Class:     org_peercast_core_PeerCastService

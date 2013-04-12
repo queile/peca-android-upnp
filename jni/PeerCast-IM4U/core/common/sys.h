@@ -200,7 +200,7 @@ class Sys
 {
 public:
 	Sys();
-
+	virtual ~Sys(){}
 
 
     virtual class ClientSocket	*createSocket() = 0;

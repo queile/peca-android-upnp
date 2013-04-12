@@ -31,11 +31,11 @@ _CORESOURCE = $(_CORE)/unix/usys.cpp \
 	 $(_CORE)/common/url.cpp \
 	 $(_CORE)/common/icy.cpp \
 	 $(_CORE)/common/pcp.cpp \
-	 $(_CORE)/common/jis.cpp \
 	 $(_CORE)/java/thread.cpp \
+	 $(_CORE)/common/jis.cpp \
 	 org_peercast_core_PeerCastService.cpp
 	 
-	 
+
 	 
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/$(_CORE) \
 										$(LOCAL_PATH)/$(_CORE)/common \
