@@ -8,6 +8,7 @@
 #define _CORELIB_COMMON_TS_VECTOR_H_
 
 #include <stdexcept>
+#include <string>
 
 // Interface
 template<class T> class ITSVector {
@@ -128,7 +129,7 @@ public:
 		::pthread_mutex_init(&mMutex, NULL);
 	}
 
-	~PTSVector()
+	virtual ~PTSVector()
 	{
 		::pthread_mutex_destroy(&mMutex);
 	}
@@ -160,7 +161,7 @@ public:
 		InitializeCriticalSection(&csec);
 	}
 
-	~WTSVector()
+	virtual ~WTSVector()
 	{
 		DeleteCriticalSection(&csec);
 	}

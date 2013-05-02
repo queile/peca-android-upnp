@@ -2,12 +2,18 @@
 <resources>
     <string name="app_name">PeerCast</string>
     <string name="app_name_full">PeerCast for Android</string>
-    <string name="pref_title_settings">Settings</string><string name="pref_title_notification">Channel Info Notification</string><string name="pref_title_version">Version 0.3-beta-IM0045</string><string name="pref_title_license_information">License Information</string><string name="msg_peercast_server_stopped">PeerCast Server stopped...</string>
+    <string name="pref_title_settings">Settings</string><string name="pref_title_notification">Notification</string><string name="pref_title_version">Version 0.4-IM4U0045</string><string name="pref_title_license_information">License Information</string><string name="msg_peercast_server_stopped">PeerCast Server stopped...</string>
     <string name="msg_are_you_sure_you_want_to_exit">Are you sure you want to exit?</string>
     
     
     <string name="msg_license_information">This program is licensed under GPLv2 or later</string>
     
     <string name="msg_peercast_server_running">PeerCast Server running on </string>
+    
+    <string name="menu_title_settings">Settings</string>
+    <string name="menu_title_remove_all_channels">Remove all channels</string><string name="cmenu_title_disconnect">Disconnect</string>
+    <string name="cmenu_title_play">Play</string>
+    <string name="cmenu_title_reconnect">Reconnect</string>
+    <string name="cmenu_title_keep">Keep</string>
     
 </resources>

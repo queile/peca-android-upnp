@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginBottom="5dp"
+    android:layout_marginTop="5dp"
+    android:orientation="horizontal"
+    tools:context=".GuiListAdapter" >
+
+    <ImageView
+        android:id="@+id/vSvtIcon"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:layout_weight="1" />
+
+    <TextView
+        android:id="@+id/vSvtVersion"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="left"
+        android:text="(----)"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:id="@+id/vSvtRelays"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:text="0 / 0"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+      <TextView
+          android:id="@+id/vSvtHost"
+          android:layout_width="0dp"
+          android:layout_height="match_parent"
+          android:layout_weight="3"
+          android:text="127.0.0.1 (localhost)"
+          android:textAppearance="?android:attr/textAppearanceMedium" />
+    
+</LinearLayout>

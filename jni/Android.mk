@@ -42,7 +42,7 @@ LOCAL_C_INCLUDES += $(LOCAL_PATH)/$(_CORE) \
 										$(LOCAL_PATH)/$(_CORE)/java
 LOCAL_CPPFLAGS := -DENABLE_BINRELOC -pthread  -D__cplusplus -D_UNIX -D_JAVA -D_REENTRANT	 
 LOCAL_CPP_FEATURES += exceptions
-#LOCAL_CPPFLAGS += -g
+LOCAL_CPPFLAGS += -g -O0
 
 LOCAL_SRC_FILES := $(_CORESOURCE)
 
@@ -52,5 +52,5 @@ LOCAL_LDLIBS := -llog
 
 include $(BUILD_SHARED_LIBRARY)
 
-$(call import-module,cpufeatures)
+#$(call import-module,cpufeatures)
 

@@ -1,9 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" ><CheckBoxPreference android:key="pref_server_running" android:defaultValue="true" android:title="@string/msg_peercast_server_stopped"/>
-    <Preference android:title="@string/pref_title_settings" android:key="pref_settings" /><CheckBoxPreference android:key="pref_notification" android:defaultValue="true" android:title="@string/pref_title_notification" />
-    <Preference android:title="@string/pref_title_version" android:enabled="false" android:summary="@string/msg_license_information"/>
-    
-    
-    
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="pref_server_running"
+        android:title="@string/msg_peercast_server_stopped" />
+
+    <Preference
+        android:key="pref_settings"
+        android:title="@string/pref_title_settings" />
+
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="pref_notification"
+        android:title="@string/pref_title_notification" />
+
+    <Preference
+        android:summary="@string/msg_license_information"
+        android:title="@string/pref_title_version" android:persistent="false" android:selectable="false"/>
 
 </PreferenceScreen>
