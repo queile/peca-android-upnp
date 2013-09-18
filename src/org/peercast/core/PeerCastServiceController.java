@@ -1,7 +1,22 @@
 package org.peercast.core;
 
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.Enumeration;
 import java.util.List;
+
+import org.apache.http.conn.util.InetAddressUtils;
+import org.teleal.cling.android.AndroidUpnpService;
+import org.teleal.cling.android.AndroidUpnpServiceImpl;
+import org.teleal.cling.registry.RegistryListener;
+import org.teleal.cling.support.igd.PortMappingListener;
+import org.teleal.cling.support.model.PortMapping;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
@@ -147,6 +162,13 @@ public class PeerCastServiceController {
 			Log.e(TAG, "PeerCast not installed.");
 			return false;
 		}
+		
+		context.bindService(
+		         new Intent(context, AndroidUpnpServiceImpl.class),
+		         pmServiceConnection,
+		         Context.BIND_AUTO_CREATE
+		     );
+		
 		Intent intent = new Intent(CLASS_NAME_PEERCAST_SERVICE);
 		return context.bindService(intent, serviceConn, Context.BIND_AUTO_CREATE);
 	}
@@ -163,7 +185,11 @@ public class PeerCastServiceController {
 		context.unbindService(serviceConn);
 		serverMessenger = null;
 		if (peerCastEventListener!=null)
-			peerCastEventListener.onDisconnectPeerCastService();		
+			peerCastEventListener.onDisconnectPeerCastService();
+		if (upnpService != null) {
+            upnpService.getRegistry().removeListener(registryListener);
+        }
+        context.unbindService(pmServiceConnection);
 	}
 
 	public void setOnPeerCastEventListener(OnPeerCastEventListener listener){
@@ -189,6 +215,83 @@ public class PeerCastServiceController {
 				peerCastEventListener.onDisconnectPeerCastService();
 		}
 	};
+	
+	private AndroidUpnpService upnpService;
+	private RegistryListener registryListener;
+	private ServiceConnection pmServiceConnection = new ServiceConnection() {
+	     public void onServiceConnected(ComponentName className, IBinder service) {
+	    	 upnpService = (AndroidUpnpService) service;
+	    	 PortMapping desiredMapping =
+	 		        new PortMapping(
+	 		                getServerPort(),
+	 		                getIpAddress(),
+	 		                PortMapping.Protocol.TCP,
+	 		                "PeerCast"
+	 		        );
+	    	 registryListener = new PortMappingListener(desiredMapping);
+	    	 upnpService.getRegistry().addListener(registryListener);
+	    	 upnpService.getControlPoint().search();
+	    	 
+	     }
+	     public void onServiceDisconnected(ComponentName className) {
+	         upnpService = null;
+	     }
+	};
+	
+	private String getIpAddress() {
+        Enumeration<NetworkInterface> netIFs;
+        try {
+            netIFs = NetworkInterface.getNetworkInterfaces();
+            while( netIFs.hasMoreElements() ) {
+                NetworkInterface netIF = netIFs.nextElement();
+                Enumeration<InetAddress> ipAddrs = netIF.getInetAddresses();
+                while( ipAddrs.hasMoreElements() ) {
+                    InetAddress ip = ipAddrs.nextElement();
+                    if (!ip.isLoopbackAddress() && !ip.isLinkLocalAddress() && ip.isSiteLocalAddress()) {
+                    	String ipStr = ip.getHostAddress().toString();
+                    	Log.d(TAG, "IP: "+ipStr);
+                        return ipStr;
+                    }
+                }
+            }
+        } catch (SocketException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+	
+	private int getServerPort() {
+		int port = 7144;
+		InputStream in;
+	    try {
+	        in = context.openFileInput("peercast.ini");  
+	        BufferedReader reader= new BufferedReader(new InputStreamReader(in,"UTF-8"));
+	        int nend;
+	        String name;
+	        String line;
+	        while( (line = reader.readLine()) != null ){
+	            nend = line.indexOf("=");
+	            if(nend != -1) {    	
+	            	name = line.substring(0, nend).trim();
+	            	if(name.equals("serverPort")) {
+	            		try {
+	            			port = Integer.valueOf(line.substring(nend+1).trim());
+	            			break;
+	            		}catch(Exception e) {
+	            			e.printStackTrace();
+	            		}
+	            	}
+	            }
+	            
+	        }
+	        reader.close();
+	        in.close();
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	    }
+	    Log.d(TAG, "Port: "+port);
+	    return port;
+	}
 
 	/**
 	 * 現在、PeerCastのサービスがOS上で起動していればtrue。
