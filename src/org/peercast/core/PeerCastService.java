@@ -51,6 +51,7 @@ public class PeerCastService extends Service {
 
 	
 	private static final int NOTIFY_ID_FOREGROUND = Integer.MAX_VALUE; //0以外
+	private NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this);
 
 
 
@@ -150,7 +151,7 @@ public class PeerCastService extends Service {
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
 				intent, 0);				
 		
-		return new NotificationCompat.Builder(this)
+		return notificationBuilder
 	     .setContentTitle(title)
 	     .setContentText(text)
 	     .setContentInfo(info)
@@ -217,7 +218,7 @@ public class PeerCastService extends Service {
 		String resDirPath = getFilesDir().getAbsolutePath();
 
 		boolean showNotify = pref.getBoolean(
-				PeerCastMainActivity.pref_notification, false);
+				PeerCastMainActivity.pref_notification, true);
 
 		synchronized (this) {
 			if (!isRunning) {
